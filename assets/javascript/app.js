@@ -14,6 +14,12 @@ var config = {
  
  var db = firebase.database();
 
+ db.ref().startAt().limitToLast(5).on("child_added", function(snapshot) {
+    var recentSearch = snapshot.val().search;
+    var recentURL = snapshot.val().url;
+    $('#recentSearches').append('<a href="' + recentURL + '">' + recentSearch + "</a><br>");
+
+ });
 
 function extraLargeImage(element) {
     return element.size === 'extralarge';
@@ -22,37 +28,46 @@ function extraLargeImage(element) {
 var artistResult = ["", "", ""];
 var artistResultImage = ["", "", ""];
 var artistResultLastFM = ["", "", ""];
-var searchRdy = false;
+var artistTopDiscogs = ["", "", ""];
+var artistTopDiscogThumb = ["", "", ""];
+
 
  $("#submitbtn").click(function(e) {
     e.preventDefault();
+    $("#displayResults").val("");
+    var artist = $("#searchForm").val();
+    var artistSearch = artist.split(' ').join('+');
+    var currentURL = "https://last.fm/music/" + artistSearch
 
-    lastFMPull();
+    lastFMPull(artistSearch);
 
-    for(x=0; x < 3; x++) {
-            createCard(artistResultImage[x], artistResult[x], artistResultLastFM[x]);
-            }
+    db.ref().push({
+        search: artist,
+        url: currentURL
+    });  
 
-function createCard(aIMG, aName, aLFM) {
+});
+
+function createCard(aIMG, aName, aLFM, aTD, aTDT) {
     $("#displayResults").append(
         '<div class="card">'  +
         '<img class="card-img-top" src="' + aIMG +
         '">' + '<div class="card-body">' +
         '<h5 class="card-title">' + aName +'</h5>' +
         '<a href="' + aLFM + '" class="card-link">' + aName +
-        ' on Last.fm' + '</a>' +
+        ' on Last.fm' + '</a>' + '<br>' +
+        "Top Releases on Discogs:" + '<br>' + '<div class="card-text">' +
+        '<img class="card-text" src="' + aTDT + '">' + '<br>' + " " + aTD +
+        '</div>' +
         '</div>'
     );
 
 }
 
-function lastFMPull() {
+function lastFMPull(artistSearch) {
 
-console.log(artistResult[0], artistResult[1],artistResult[2])
-    var api = "5ab1615116e0cf8fa1c5270f3ab5310b";
-    var artist = $("#searchForm").val();
-    var artistSearch = artist.split(' ').join('+');
-    var lastFMURL = "http://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=" + artistSearch + "&api_key=" + api + "&format=json";
+    var lastApi = "5ab1615116e0cf8fa1c5270f3ab5310b";
+    var lastFMURL = "http://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=" + artistSearch + "&api_key=" + lastApi + "&format=json";
 
   $.ajax({
     url: lastFMURL,
@@ -69,13 +84,33 @@ console.log(artistResult[0], artistResult[1],artistResult[2])
     artistResult[x] = artistName;
     artistResultImage[x] = artistImage;
     artistResultLastFM[x] = artistLastFM;
-
+        }
+    }).then(function() {
+        for(x=0; x < 3; x++) {
+        discogsPull(artistResult[x], artistResultImage[x], artistResultLastFM[x], x);
         }
     });
-
-    return true;
 }
 
-    });
+function discogsPull(aResult, aResultImg, aResultLFM, y) {
+    var discToken = "wbbxBuWRXkskhtSOFJfYlguczHGzXROzjdXySTcI";
 
+        aResultString = aResult.split(' ').join('+');
+        var discURL = "https://api.discogs.com/database/search?q=" + aResultString + "?artist&token=" + discToken
+
+        $.ajax({
+            url: discURL,
+            method: "GET"
+        }).done(function(response) {
+            for(x=0; x <3; x++) {
+            artistTopDiscogs[x] = response.results[0].title;
+            artistTopDiscogThumb[x] = response.results[0].thumb;
+            }
+
+        }).then(function() {
+            createCard(aResultImg, aResult, aResultLFM, artistTopDiscogs[y], artistTopDiscogThumb[y]);
+        });
+    }
+ 
 });
+
