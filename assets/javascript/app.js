@@ -37,13 +37,16 @@ function extraLargeImage(element) {
     $("#displayResults").empty();
     var artist = $("#searchForm").val();
     var artistSearch = artist.split(' ').join('+');
+    artistSearch = artistSearch.replace(/[\/\\#,()~%.'":*?<>{}]/g, '');
+    artistSearch = artistSearch.replace("$", "s")
+    artistSearch = artistSearch.replace("&", "and")
+
     var currentURL = "https://last.fm/music/" + artistSearch
 
     lastFMPull(artistSearch);
 
     db.ref().push({
         search: artist,
-        url: currentURL
     });  
 
 });
@@ -53,6 +56,9 @@ $(document).on("click","#recent", function(e){
     $("#displayResults").empty();
     var artist = $(this).text();
     var artistSearch = artist.split(' ').join('+');
+    artistSearch = artistSearch.replace(/[\/\\#,()~%.'":*?<>{}]/g, '');
+    artistSearch = artistSearch.replace("$", "s")
+    artistSearch = artistSearch.replace("&", "and")
 
     lastFMPull(artistSearch);
 
@@ -63,15 +69,22 @@ $(document).on("click", "#searchSuggestion", function(e) {
     $("#displayResults").empty();
     var artist = $('#artistName').text();
     var artistSearch = artist.split(' ').join('+');
+    artistSearch = artistSearch.replace(/[\/\\#,()~%.'":*?<>{}]/g, '');
+    // artistSearch = artistSearch.replace("$", "s")
+    artistSearch = artistSearch.replace("&", "and")
 
+    db.ref().push({
+        search: artist,
+    });  
     lastFMPull(artistSearch);
 });
 
 
 function createCard(z) {
     var aNameS = artistResult[z].split(' ').join('+');
-        aNameS = aNameS.replace(/[&\/\\#,()~%.'":*?<>{}]/g, '');
+        aNameS = aNameS.replace(/[\/\\#,()~%.'":*?<>{}]/g, '');
         aNameS = aNameS.replace("$", "s");
+        aNameS = aNameS.replace("&", "and");
 
         console.log(z, artistResult[z]);
     $("#displayResults").append(
@@ -79,8 +92,10 @@ function createCard(z) {
         '<img class="card-img-top" src="' + artistResultImage[z] +
         '">' + '<div class="card-body">' +
         '<h5 class="card-title" id="modalName' + z +'">' + artistResult[z] +'</h5>' +
-        '<a href="' + artistResultLastFM[z] + '" class="card-link">' + artistResult[z] +
-        ' on Last.fm' + '</a>' + '<br>' +
+        '<a href="' + artistResultLastFM[z] + '" class="card-link">' +
+        'Last.fm' + '</a>' + '<br>' +
+        '<a href="https://en.wikipedia.org/wiki/Special:Search?search=' + artistResult[z] + '" class="card-link">'
+        + 'Wikipedia' + '</a><br><br>' +
         '<button type="button" class="btn btn-secondary btn-sm" id="modalBTN' + z + '"> More Info</button>' +
         '</div>'
     );
@@ -116,9 +131,6 @@ function lastFMPull(artistSearch) {
     });
 }
 
-function discogsPull() {
-   
-    }
     $(document).on("click","#modalBTN0", function(){
         var modalCount = 0; 
         createModal(modalCount);
