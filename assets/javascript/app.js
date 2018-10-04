@@ -23,7 +23,7 @@ var config = {
     var recentSearch = snapshot.val().search;
     var recentURL = snapshot.val().url;
     recentSearch = toTitleCase(recentSearch);
-    $('#recentSearches').append('<a href="" id="recent">' + recentSearch + "</a><br>");
+    $('#recentSearches').append('<a class="animated flash" href="" id="recent">' + recentSearch + "</a><br>");
 
  });
 
@@ -88,7 +88,7 @@ function createCard(z) {
 
         console.log(z, artistResult[z]);
     $("#displayResults").append(
-        '<div class="card">'  +
+        '<div class="card animated fadeInDownBig">'  +
         '<img class="card-img-top" src="' + artistResultImage[z] +
         '">' + '<div class="card-body">' +
         '<h5 class="card-title" id="modalName' + z +'">' + artistResult[z] +'</h5>' +
@@ -106,7 +106,7 @@ function createCard(z) {
 function lastFMPull(artistSearch) {
 
     var lastApi = "5ab1615116e0cf8fa1c5270f3ab5310b";
-    var lastFMURL = "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=" + artistSearch + "&api_key=" + lastApi + "&format=json";
+    var lastFMURL = "https://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=" + artistSearch + "&api_key=" + lastApi + "&format=json";
 
   $.ajax({
     url: lastFMURL,
@@ -160,7 +160,7 @@ function createModal(z) {
     $('#searchSimilar').text('');
     var newSearch = artistResult[z].split(' ').join('+');
     var lastApi = "5ab1615116e0cf8fa1c5270f3ab5310b";
-    var lastFMURL = "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=" + newSearch + "&api_key=" + lastApi + "&format=json";
+    var lastFMURL = "https://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=" + newSearch + "&api_key=" + lastApi + "&format=json";
     
       $.ajax({
         url: lastFMURL,
